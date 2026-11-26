@@ -17,16 +17,23 @@
 //    and the twenty-year price of sorting them out.
 // 5. It stings: it admits the mother saw clearly and the son did not,
 //    and it is warm without being sentimental.
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 
 const LINE =
   "Your mother is right about the girl and wrong about the job — you'll spend twenty years learning which is which.";
 
-// The gate only accepts 1–200 characters of non-blank UTF-8 text;
-// fail loudly here rather than shipping an invalid entry.
+// The gate only accepts 1–200 characters of non-blank UTF-8 text on a
+// single line; fail loudly here rather than shipping an invalid entry.
 if (LINE.length < 1 || LINE.length > 200 || LINE.trim().length === 0) {
   throw new Error(`entry line must be 1-200 chars, got ${LINE.length}`);
+}
+if (LINE.includes("\n") || LINE.includes("\r")) {
+  throw new Error("entry line must be a single line");
 }
 
 mkdirSync("/output", { recursive: true });
 writeFileSync("/output/entry.txt", LINE, "utf8");
+
+if (readFileSync("/output/entry.txt", "utf8") !== LINE) {
+  throw new Error("entry.txt does not match the line");
+}
